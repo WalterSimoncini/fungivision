@@ -8,9 +8,6 @@ from PIL import Image
 from typing import List
 from torch.utils.data import Dataset
 from src.utils.head import FUNGIHead
-from src.gradients.dino import DINOGradientsExtractor
-from src.gradients.simclr import SimCLRGradientsExtractor
-from src.gradients.kl_extractor import KLGradientsExtractor
 from src.utils.misc import model_feature_dim, rgetattr, freeze_model
 from src.utils.compression import suggested_scaling_factor, generate_projection_matrix
 
@@ -26,9 +23,11 @@ class FUNGIWrapper():
         input_dim: int = 224,
         use_fp16: bool = False,
         fp16_dtype: torch.dtype = torch.bfloat16,
+        extractor_configs: List = []
     ) -> None:
         assert model is not None, f"a valid model must be provided! {model} given"
         assert target_layer is not None, f"a valid target layer must be provided! {target_layer} given"
+        assert len(extractor_configs) > 0, "you must provide at least one extractor config!"
 
         self.target_layer = f"backbone.{target_layer}"
         self.model = model.to(device)
@@ -37,6 +36,7 @@ class FUNGIWrapper():
         logging.info(f"estimating the model output dimensionality...")
         self.embeddings_dim = model_feature_dim(model, device, image_size=input_dim)
 
+        # FIXME: Maybe remove the head and let every extractor manage it?
         self.model = FUNGIHead(
             backbone=model,
             embeddings_dim=self.embeddings_dim,
@@ -77,20 +77,14 @@ class FUNGIWrapper():
             "fp16_dtype": fp16_dtype,
         }
 
-        self.kl_gradients_extractor = KLGradientsExtractor(**extractor_params)
-        self.dino_gradients_extractor = DINOGradientsExtractor(**extractor_params)
-        self.simclr_gradients_extractor = SimCLRGradientsExtractor(**extractor_params)
-
         self.extractors = [
-            self.kl_gradients_extractor,
-            self.dino_gradients_extractor,
-            self.simclr_gradients_extractor
+            cfg.get_extractor(base_params=extractor_params) for cfg in extractor_configs
         ]
 
     def setup(self, dataset: Dataset) -> None:
         """Run the setup method for every FUNGI feature extractor"""
         for extractor in self.extractors:
-            logging.info(f"running setup for extractor {extractor}")
+            logging.info(f"running setup for extractor {type(extractor).__name__}")
 
             extractor.setup(dataset=dataset)
 
@@ -105,8 +99,6 @@ class FUNGIWrapper():
 
     def forward(self, images: List[Image.Image]) -> torch.Tensor:
         gradients = []
-
-        # FIXME: Also extract embeddings?    
 
         for extractor in self.extractors:
             extractor_gradients = extractor.forward(images=images)

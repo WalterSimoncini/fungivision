@@ -10,6 +10,7 @@ from torchvision.datasets import Flowers102
 from torch.utils.data import DataLoader, Dataset
 from sklearn.neighbors import KNeighborsClassifier
 from src.utils.metrics import mean_per_class_accuracy
+from src.config import KLConfig, DINOConfig, SimCLRConfig
 
 
 logging.basicConfig(
@@ -29,7 +30,8 @@ fungi = FUNGIWrapper(
     target_layer="blocks.11.attn.proj",
     device=device,
     latent_dim=768,
-    use_fp16=True
+    use_fp16=True,
+    extractor_configs=[KLConfig(), DINOConfig()]
 )
 
 def extract_features(wrapper: FUNGIWrapper, dataset: Dataset, batch_size: int) -> Tuple[torch.Tensor, torch.Tensor]:
