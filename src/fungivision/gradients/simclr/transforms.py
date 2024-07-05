@@ -1,6 +1,5 @@
 import math
 import torch
-import logging
 import torch.nn as nn
 import torchvision.transforms.v2 as tf
 

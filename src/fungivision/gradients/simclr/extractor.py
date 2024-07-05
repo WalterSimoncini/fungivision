@@ -53,7 +53,13 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
         return Patchify(num_patches=4, stride_scale=6, input_dim=input_dim)
 
     def setup(self, dataset: Dataset) -> None:
-        """Compute the comparison batch by sampling images from the given dataset"""
+        """
+            Build the negative batch by sampling images from the given dataset.
+
+            Args:
+                dataset (torch.utils.Dataset): the dataset to sample the negative
+                    batch from. It's recommended to use the training split.
+        """
         logging.info("computing the simclr comparison batch")
 
         sample_indices = torch.randperm(len(dataset))
@@ -73,10 +79,9 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
                 end_index = (i + 1) * self.comparison_batch_encoding_batch_size
 
                 minibatch = samples[start_index:end_index].to(self.device)
+                embeddings = self.model(minibatch)
 
-                encoded_samples.append(
-                    self.model(minibatch).detach()
-                )
+                encoded_samples.append(self.projection_head(embeddings).detach())
 
         self.comparison_batch = torch.cat(encoded_samples, dim=0)
 
@@ -86,7 +91,7 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
     def compute_loss(self, latents: torch.Tensor, views_per_sample: int, **kwargs) -> torch.Tensor:
         """
             Compute the InfoNCE loss for each batch item individually,
-            and return the mean loss
+            and return the mean loss.
         """
         batch_size = latents.shape[0] // views_per_sample
         latents = latents.reshape(batch_size, views_per_sample, -1)
@@ -109,31 +114,24 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
             :param test_views:
                 The positive examples for the loss calculation
         """
-        # Concatenate the batch samples and the
-        # test views in a single tensor
-        features = torch.cat([
-            self.comparison_batch,
-            latents
-        ], dim=0)
+        # Concatenate the batch samples and the test views in a single tensor
+        features = torch.cat([self.comparison_batch, latents], dim=0)
 
         if self.use_fp16:
             features = features.to(self.fp16_dtype)
 
+        n_positive_views = latents.shape[0]
         features = nn.functional.normalize(features, dim=-1, p=2)
 
-        n_positive_views = latents.shape[0]
         cosine_sim = self.masked_cosine_similarity(
             features=features,
             device=self.device,
             n_positive_views=n_positive_views
         )
 
-        # Finally calculate the InfoNCE loss
-        cosine_sim = cosine_sim / self.temperature
-
         # Select only the bottom-right corner of the cosine similarity matrix, i.e.
         # the similarities between the positive views
-        positive_cosine_sim = cosine_sim[-n_positive_views:, -n_positive_views:]
+        positive_cosine_sim = cosine_sim[-n_positive_views:, -n_positive_views:] / self.temperature
 
         # Zero out the diagonal to remove the effect of self-similarities and calculate the
         # mean self-similarities by averaging over columns. We divide by positives - 1 as
@@ -148,31 +146,22 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
         # against all other views, so we only compute the bottom rectangle of
         # the cosine similarity matrix, selecting only rows that belong to
         # positive views
-        num_features = features.shape[0]
         cosine_sim = cosine_similarity(
             features[-n_positive_views:, None, :],
             features[None, :, :],
             dim=-1
         )
 
-        # Make the cosine similarity matrix square, as if we computed it fully.
-        # This trick is done in order for masked fill to work nicely with the
-        # diagonal masking
-        cosine_sim = torch.cat([
-            torch.zeros(num_features - n_positive_views, num_features, device=device),
-            cosine_sim
-        ], dim=0)
+        # We will always have more columns than rows here
+        # as the columns include the negatives, while the
+        # rows only include the positive views
+        n_rows, n_cols = cosine_sim.shape
 
-        # Mask out cosine similarity from each sample to
-        # itself (by making it very negative)
-        self_sim_mask = torch.eye(
-            cosine_sim.shape[0],
-            dtype=torch.bool,
-            device=device
+        # Fill the "rightmost" diagonal with the self-similarity
+        # constant, as this diagonal represents the matches of
+        # each positive view with itself
+        return torch.diagonal_scatter(
+            cosine_sim,
+            torch.ones(n_rows) * self.self_similarity_constant,
+            n_cols - n_rows
         )
-
-        cosine_sim.masked_fill_(self_sim_mask, self.self_similarity_constant)
-
-        # Finally return the bottom [positive, positive + negative]
-        # rectangle we are interested in
-        return cosine_sim[-n_positive_views:, :]

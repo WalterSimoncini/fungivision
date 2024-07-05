@@ -56,7 +56,7 @@ fungi = FUNGIWrapper(
     target_layer="blocks.11.attn.proj",
     device=device,
     use_fp16=True,
-    extractor_configs=[KLConfig(), DINOConfig()]
+    extractor_configs=[SimCLRConfig()]
 )
 
 def extract_features(wrapper: FUNGIWrapper, dataset: Dataset, batch_size: int) -> Tuple[torch.Tensor, torch.Tensor]:
