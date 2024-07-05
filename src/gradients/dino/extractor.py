@@ -17,6 +17,8 @@ class DINOGradientsExtractor(BaseGradientExtractor):
         device: torch.device,
         projection: torch.Tensor,
         projection_scaling: float,
+        embeddings_dim: int,
+        latent_dim: int,
         input_dim: int = 224,
         use_fp16: bool = False,
         fp16_dtype: torch.dtype = torch.bfloat16,
@@ -30,6 +32,8 @@ class DINOGradientsExtractor(BaseGradientExtractor):
             device,
             projection,
             projection_scaling,
+            embeddings_dim,
+            latent_dim,
             input_dim,
             use_fp16,
             fp16_dtype,
@@ -40,8 +44,8 @@ class DINOGradientsExtractor(BaseGradientExtractor):
         self.student_temperature = student_temperature
 
         self.teacher_projection = nn.Linear(
-            self.model.embeddings_dim,
-            self.model.latent_dim
+            embeddings_dim,
+            latent_dim
         ).to(self.device)
 
         # Disable the gradients calculation for the teacher
@@ -67,19 +71,19 @@ class DINOGradientsExtractor(BaseGradientExtractor):
 
         with torch.cuda.amp.autocast(dtype=torch.bfloat16, enabled=self.use_fp16):
             # Encode global and local views using the backbone
-            latents = self.model.backbone(views)
-            latents = latents.reshape(B, CR, -1)
-            latents = nn.functional.normalize(latents, dim=-1, p=2)
+            embeddings = self.model(views)
+            embeddings = embeddings.reshape(B, CR, -1)
+            embeddings = nn.functional.normalize(embeddings, dim=-1, p=2)
 
             # Project the global views with the teacher projection,
             # without registering gradients
             with torch.no_grad():
-                teacher_latents = latents[:, :2].reshape(B * 2, -1).detach()
+                teacher_latents = embeddings[:, :2].reshape(B * 2, -1).detach()
                 teacher_latents = self.teacher_projection(teacher_latents)
 
             # Project the student gradients
-            student_latents = latents.reshape(B * CR, -1)
-            student_latents = self.model.projection(student_latents)
+            student_latents = embeddings.reshape(B * CR, -1)
+            student_latents = self.projection_head(student_latents)
 
             loss = self.compute_loss(
                 latents=student_latents,

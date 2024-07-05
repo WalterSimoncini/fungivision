@@ -29,7 +29,6 @@ fungi = FUNGIWrapper(
     model=model,
     target_layer="blocks.11.attn.proj",
     device=device,
-    latent_dim=768,
     use_fp16=True,
     extractor_configs=[KLConfig(), DINOConfig()]
 )

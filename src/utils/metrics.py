@@ -7,9 +7,16 @@ def mean_per_class_accuracy(preds: np.ndarray, targets: np.ndarray) -> float:
    """
       Calculates the mean per class accuracy by calculating
       the accuracy for each individual class and then averaging
-      them. See the links below for more details:
+      them. See the link below for more details:
 
       - https://stackoverflow.com/questions/39770376/scikit-learn-get-accuracy-scores-for-each-class
+
+      Args:
+         preds (np.ndarray): the model predictions
+         targets (np.ndarray): the ground truth targets
+
+      Returns:
+         float: the mean-per-class accuracy metric
    """
    mat = confusion_matrix(preds, targets)
 

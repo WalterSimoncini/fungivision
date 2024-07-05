@@ -16,8 +16,7 @@ from typing import Tuple
 
 def suggested_scaling_factor(projection_dim: int) -> float:
     """
-        Return the scaling factor for the projected
-        matrix according to
+        Return the scaling factor for the projected matrix according to
 
         @article{roburin2022take,
             title={Take One Gram of Neural Features, Get Enhanced Group Robustness},
@@ -25,22 +24,27 @@ def suggested_scaling_factor(projection_dim: int) -> float:
             journal={arXiv preprint arXiv:2208.12625},
             year={2022}
         }
+
+        Args:
+            projection_dim (int): the output dimension of the linear projection.
+
+        Returns:
+            float: the scaling factor.
     """
     return 1.0 / torch.sqrt(torch.tensor(projection_dim))
 
 
 def generate_projection_matrix(dims: Tuple[int, int], device: torch.device = torch.device("cpu")) -> torch.Tensor:
     """
-        Generates a matrix filled with 1 or -1 with
-        a 50% probability.
+        Generates a matrix filled with 1 or -1 with a 50% probability.
 
-        :param dims:
-            the dimensions of the projection matrix,
-            given as (out_dim, in_dim)
+        Args:
+            dims (int, int):  the dimensions of the projection matrix,
+                given as (out_dim, in_dim).
 
-        :returns:
-            the projection matrix, on the given device
-            and with a float32 data type
+        Returns:
+            torch.Tensor: the projection matrix, on the given device
+            and with a float32 data type.
     """
     projection = ((torch.rand(dims) - 0.5) > 0).to(torch.int8).to(device)
     projection[projection == 0] = -1

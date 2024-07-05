@@ -2,7 +2,6 @@ import math
 import torch
 import logging
 import torch.nn as nn
-import torch.nn.functional as F
 
 from tqdm import tqdm
 from torch.utils.data import Dataset
@@ -20,6 +19,8 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
         device: torch.device,
         projection: torch.Tensor,
         projection_scaling: float,
+        embeddings_dim: int,
+        latent_dim: int,
         input_dim: int = 224,
         use_fp16: bool = False,
         fp16_dtype: torch.dtype = torch.bfloat16,
@@ -35,6 +36,8 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
             device,
             projection,
             projection_scaling,
+            embeddings_dim,
+            latent_dim,
             input_dim,
             use_fp16,
             fp16_dtype,
@@ -77,6 +80,9 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
 
         self.comparison_batch = torch.cat(encoded_samples, dim=0)
 
+    def encode(self, views: torch.Tensor) -> torch.Tensor:
+        return self.projection_head(self.model(views))
+
     def compute_loss(self, latents: torch.Tensor, views_per_sample: int, **kwargs) -> torch.Tensor:
         """
             Compute the InfoNCE loss for each batch item individually,
@@ -113,7 +119,7 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
         if self.use_fp16:
             features = features.to(self.fp16_dtype)
 
-        features = F.normalize(features, dim=-1, p=2)
+        features = nn.functional.normalize(features, dim=-1, p=2)
 
         n_positive_views = latents.shape[0]
         cosine_sim = self.masked_cosine_similarity(

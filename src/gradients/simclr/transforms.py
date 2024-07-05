@@ -16,11 +16,15 @@ class Patchify(nn.Module):
             1. Resize the input image to (image_size, image_size)
             2. Split the image into num_patches patches. The square root
                of the number of patches must be an integer!
-            3. Resize each patch to (image_size, image_size) and apply
+            3. Resize each patch to (image_size, image_size) and apply the
                ImageNet normalization
 
-            :param stride_scale: the factor (1/x) used to calculate the stride
-                                 step relative to the patch size
+            Args:
+                num_patches (int): number of patches to extract if the stride
+                    scale was 1. Must be a perfect square.
+                image_size (int): the input size required by the model.
+                stride_scale (int): the factor (1/x) used to calculate the stride
+                    step relative to the patch size.
         """
         super().__init__()
 
@@ -46,7 +50,17 @@ class Patchify(nn.Module):
             tf.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         ])
 
-    def __call__(self, img) -> torch.Tensor:
+    def __call__(self, img: Image.Image) -> torch.Tensor:
+        """
+            Patchify an image.
+
+            Args:
+                img (PIL.Image): a PIL image.
+
+            Returns:
+                torch.Tensor: a tensor of shape [V, C, H, W] where V
+                    is the total number of patches.
+        """
         img = self.in_transform(img)
         stride, kernel_h, kernel_w = int(self.patch_size / self.stride_scale), self.patch_size, self.patch_size
 

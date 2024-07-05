@@ -15,6 +15,8 @@ class KLGradientsExtractor(BaseGradientExtractor):
         device: torch.device,
         projection: torch.Tensor,
         projection_scaling: float,
+        embeddings_dim: int,
+        latent_dim: int,
         input_dim: int = 224,
         use_fp16: bool = False,
         fp16_dtype: torch.dtype = torch.bfloat16,
@@ -27,6 +29,8 @@ class KLGradientsExtractor(BaseGradientExtractor):
             device,
             projection,
             projection_scaling,
+            embeddings_dim,
+            latent_dim,
             input_dim,
             use_fp16,
             fp16_dtype,
@@ -36,6 +40,18 @@ class KLGradientsExtractor(BaseGradientExtractor):
         self.temperature = temperature
 
     def input_transform(self, input_dim: int) -> nn.Module:
+        """
+            Returns the transform applied to input images, which
+            resizes the input to (256, 256), crops it in the center
+            so that the input has shape (input_dim, input_dim) and
+            normalizes it using the ImageNet statistics.
+
+            Args:
+                input_dim (int): the input dimensionality of the model.
+
+            Returns:
+                nn.Module: a transform that returns a [C, H, W] tensor.
+        """
         return tf.Compose([
             tf.ToImage(),
             tf.Resize((256, 256), interpolation=InterpolationMode.BILINEAR, antialias=True),
@@ -47,7 +63,17 @@ class KLGradientsExtractor(BaseGradientExtractor):
     def compute_loss(self, latents: torch.Tensor, views_per_sample: int, **kwargs) -> torch.Tensor:
         """
             Compute the KL divergence between the softmaxed latents and an
-            uniform distribution
+            uniform distribution.
+
+            Args:
+                latents (torch.Tensor): the encoded latents for all batch
+                    items and their views.
+                views_per_sample (int): the number of views generated for
+                    each original image.
+
+            Returns:
+                torch.Tensor: the loss tensor, as a single number averaged
+                    over the batch dimension.
         """
         latent_dim = latents.shape[1]
 
