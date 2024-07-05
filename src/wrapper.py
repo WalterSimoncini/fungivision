@@ -2,13 +2,13 @@ import torch
 import logging
 import torch.nn as nn
 
-import src.fungivision.utils.autograd_hacks as autograd_hacks
+import src.utils.autograd_hacks as autograd_hacks
 
 from PIL import Image
 from typing import List, Optional
 from torch.utils.data import Dataset
-from src.fungivision.utils.misc import model_feature_dim, rgetattr, freeze_model
-from src.fungivision.utils.compression import suggested_scaling_factor, generate_projection_matrix
+from src.utils.misc import model_feature_dim, rgetattr, freeze_model
+from src.utils.compression import suggested_scaling_factor, generate_projection_matrix
 
 
 class FUNGIWrapper():
@@ -122,9 +122,6 @@ class FUNGIWrapper():
             W += 1
 
         return H * W
-
-    def __call__(self, images: List[Image.Image]) -> torch.Tensor:
-        return self.forward(images=images)
 
     def forward(self, images: List[Image.Image]) -> torch.Tensor:
         """

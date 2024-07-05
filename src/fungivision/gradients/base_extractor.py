@@ -89,6 +89,9 @@ class BaseGradientExtractor(ABC):
         """
         pass
 
+    def __call__(self, images: List[Image.Image]) -> torch.Tensor:
+        return self.forward(images=images)
+
     def forward(self, images: List[Image.Image]) -> torch.Tensor:
         """
             Extract gradient features for a list of images.

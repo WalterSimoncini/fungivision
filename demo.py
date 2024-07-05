@@ -10,8 +10,8 @@ from sklearn.metrics import confusion_matrix
 from torch.utils.data import DataLoader, Dataset
 from sklearn.neighbors import KNeighborsClassifier
 
-from fungivision.wrapper import FUNGIWrapper
-from fungivision.config import KLConfig, DINOConfig, SimCLRConfig
+from src.fungivision.wrapper import FUNGIWrapper
+from src.fungivision.config import KLConfig, DINOConfig, SimCLRConfig
 
 
 def mean_per_class_accuracy(preds: np.ndarray, targets: np.ndarray) -> float:
@@ -74,7 +74,7 @@ def extract_features(wrapper: FUNGIWrapper, dataset: Dataset, batch_size: int) -
     for images, batch_targets in tqdm(data_loader):
         targets.append(torch.tensor(batch_targets))
         gradients.append(
-            wrapper.forward(list(images)).cpu().float()
+            wrapper(list(images)).cpu().float()
         )
 
     return normalize(torch.cat(gradients, dim=0), dim=-1), torch.cat(targets, dim=0)
