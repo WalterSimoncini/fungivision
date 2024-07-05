@@ -8,8 +8,8 @@ from typing import Tuple
 
 class DINOTransform(nn.Module):
     """
-        The DINO data augmentation, using only random crops. Mostly taken
-        from https://github.com/facebookresearch/dino/blob/main/main_dino.py#L419
+        The DINO data augmentation, using only random crops. Mostly taken from
+        https://github.com/facebookresearch/dino/blob/main/main_dino.py#L419.
     """
     def __init__(
         self,

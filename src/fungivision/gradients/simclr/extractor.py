@@ -60,7 +60,7 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
                 dataset (torch.utils.Dataset): the dataset to sample the negative
                     batch from. It's recommended to use the training split.
         """
-        logging.info("computing the simclr comparison batch")
+        logging.info("computing the simclr negative batch")
 
         sample_indices = torch.randperm(len(dataset))
         sample_indices = sample_indices[:self.comparison_batch_size]
@@ -103,16 +103,16 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
 
         return losses.mean()
 
-    def info_nce_loss(self, latents: torch.Tensor):
+    def info_nce_loss(self, latents: torch.Tensor) -> torch.Tensor:
         """
-            Calculates the InfoNCE loss for a pair of positive
-            examples (test_views) against a batch of negative
-            examples (batch).
+            Calculates the InfoNCE loss for a set of positive views
+            (i.e. the latents) against a batch of negatives.
 
-            :param batch:
-                The negative examples for the loss calculation
-            :param test_views:
-                The positive examples for the loss calculation
+            Args:
+                latents (torch.Tensor): the encoded positive views.
+
+            Returns:
+                torch.Tensor: the infoNCE loss.
         """
         # Concatenate the batch samples and the test views in a single tensor
         features = torch.cat([self.comparison_batch, latents], dim=0)
@@ -125,23 +125,36 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
 
         cosine_sim = self.masked_cosine_similarity(
             features=features,
-            device=self.device,
             n_positive_views=n_positive_views
         )
 
         # Select only the bottom-right corner of the cosine similarity matrix, i.e.
         # the similarities between the positive views
-        positive_cosine_sim = cosine_sim[-n_positive_views:, -n_positive_views:] / self.temperature
+        positive_cosine_sim = cosine_sim[:, -n_positive_views:] / self.temperature
 
         # Zero out the diagonal to remove the effect of self-similarities and calculate the
         # mean self-similarities by averaging over columns. We divide by positives - 1 as
         # one element will always be zero
-        nll = -(positive_cosine_sim - torch.diag(torch.diag(positive_cosine_sim))).sum(dim=1) / (n_positive_views - 1)
-        nll += torch.logsumexp(cosine_sim[-n_positive_views:, :], dim=-1)
+        nll = -(positive_cosine_sim - torch.diag(positive_cosine_sim)).sum(dim=1) / (n_positive_views - 1)
+        nll += torch.logsumexp(cosine_sim, dim=-1)
 
         return nll.mean()
 
-    def masked_cosine_similarity(self, features: torch.Tensor, device: torch.device, n_positive_views: int) -> torch.Tensor:
+    def masked_cosine_similarity(self, features: torch.Tensor, n_positive_views: int) -> torch.Tensor:
+        """
+            Compute the cosine similarity between each positive view and all
+            other features, including themselves. The self-similarity is masked
+            using a highly negative number, i.e. self.self_similarity_constant.
+
+            Args:
+                features (torch.Tensor): the features matrix [B, E].
+                n_positive_views (int): the number of positive views, assumed
+                    to be at the last N rows of the features matrix.
+
+            Returns:
+                torch.Tensor: the similarity matrix between the positive views
+                    and all other views, of shape [N, B].
+        """
         # We are only interested in the cosine similarity of the positive views
         # against all other views, so we only compute the bottom rectangle of
         # the cosine similarity matrix, selecting only rows that belong to

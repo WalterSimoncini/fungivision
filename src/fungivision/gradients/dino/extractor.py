@@ -94,7 +94,17 @@ class DINOGradientsExtractor(BaseGradientExtractor):
         return self.backprop(loss=loss, batch_size=B, views_per_sample=CR)
 
     def compute_loss(self, latents: torch.Tensor, views_per_sample: int, teacher_latents: torch.Tensor, **kwargs) -> torch.Tensor:
-        """Compute the DINO loss"""
+        """
+            Compute the DINO loss.
+
+            Args:
+                latents (torch.Tensor): the encoded global and local views
+                    for the student model, of shape [B * V, E]
+                views_per_sample (int): the total number of views for every
+                    input image
+                teacher_latents (torch.Tensor): the encoded global views for
+                    the teacher model, of shape [B * 2, E]
+        """
         batch_size = latents.shape[0] // views_per_sample
 
         student_emb = latents.reshape(batch_size, views_per_sample, -1)

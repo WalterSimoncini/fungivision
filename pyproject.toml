@@ -10,6 +10,7 @@ authors = [
 ]
 description = "FUNGI: Features from UNsupervised GradIents"
 readme = "README.md"
+license = {file = "LICENSE.txt"}
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
