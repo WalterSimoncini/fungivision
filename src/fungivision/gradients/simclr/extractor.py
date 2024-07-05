@@ -28,8 +28,13 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
         self_similarity_constant: float = -10e3,
         comparison_batch_size: int = 64,
         comparison_batch_encoding_batch_size: int = 32,
+        num_patches: int = 4,
+        stride_scale: int = 6,
         **kwargs
     ) -> None:
+        self.num_patches = num_patches
+        self.stride_scale = stride_scale
+
         super().__init__(
             model,
             target_layer,
@@ -50,7 +55,11 @@ class SimCLRGradientsExtractor(BaseGradientExtractor):
         self.comparison_batch_encoding_batch_size = comparison_batch_encoding_batch_size
 
     def input_transform(self, input_dim: int) -> nn.Module:
-        return Patchify(num_patches=4, stride_scale=6, input_dim=input_dim)
+        return Patchify(
+            num_patches=self.num_patches,
+            stride_scale=self.stride_scale,
+            input_dim=input_dim
+        )
 
     def setup(self, dataset: Dataset) -> None:
         """
