@@ -1,0 +1,23 @@
+[build-system]
+requires = ["flit_core>=3.9"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "fungivision"
+version = "0.0.1"
+authors = [
+  {name="Walter Simoncini", email="walter@ashita.nl"},
+]
+description = "FUNGI: Features from UNsupervised GradIents"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+  "torch>=2.3.1",
+  "torchvision>=0.18.1",
+  "tqdm>=4.66.4"
+]

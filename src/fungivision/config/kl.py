@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 
-from src.gradients.kl_extractor import KLGradientsExtractor
+from src.fungivision.gradients.kl_extractor import KLGradientsExtractor
 
 
 @dataclass

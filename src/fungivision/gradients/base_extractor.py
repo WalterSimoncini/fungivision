@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
-import src.utils.autograd_hacks as autograd_hacks
+import src.fungivision.utils.autograd_hacks as autograd_hacks
 
 from PIL import Image
 from typing import List
 from abc import abstractmethod, ABC
-from src.utils.misc import rgetattr
 from torch.utils.data import Dataset
+from src.fungivision.utils.misc import rgetattr
 
 
 class BaseGradientExtractor(ABC):

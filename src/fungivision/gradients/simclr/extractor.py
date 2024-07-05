@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 from torch.nn.functional import cosine_similarity
 
 from .transforms import Patchify
-from src.gradients.base_extractor import BaseGradientExtractor
+from src.fungivision.gradients.base_extractor import BaseGradientExtractor
 
 
 class SimCLRGradientsExtractor(BaseGradientExtractor):

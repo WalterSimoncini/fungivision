@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
-import src.utils.autograd_hacks as autograd_hacks
+import src.fungivision.utils.autograd_hacks as autograd_hacks
 
 from typing import List
 from PIL.Image import Image
-from src.gradients.base_extractor import BaseGradientExtractor
+from src.fungivision.gradients.base_extractor import BaseGradientExtractor
 
 from .transforms import DINOTransform
 

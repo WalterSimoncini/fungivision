@@ -4,13 +4,39 @@ import numpy as np
 
 from tqdm import tqdm
 from typing import Tuple
-from src.wrapper import FUNGIWrapper
 from torch.nn.functional import normalize
 from torchvision.datasets import Flowers102
+from sklearn.metrics import confusion_matrix
 from torch.utils.data import DataLoader, Dataset
 from sklearn.neighbors import KNeighborsClassifier
-from src.utils.metrics import mean_per_class_accuracy
-from src.config import KLConfig, DINOConfig, SimCLRConfig
+
+from fungivision.wrapper import FUNGIWrapper
+from fungivision.config import KLConfig, DINOConfig, SimCLRConfig
+
+
+def mean_per_class_accuracy(preds: np.ndarray, targets: np.ndarray) -> float:
+   """
+      Calculates the mean per class accuracy by calculating
+      the accuracy for each individual class and then averaging
+      them. See the link below for more details:
+
+      - https://stackoverflow.com/questions/39770376/scikit-learn-get-accuracy-scores-for-each-class
+
+      Args:
+         preds (np.ndarray): the model predictions
+         targets (np.ndarray): the ground truth targets
+
+      Returns:
+         float: the mean-per-class accuracy metric
+   """
+   mat = confusion_matrix(preds, targets)
+
+   # Summing over rows results in the total number of elements for each class.
+   # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
+   class_sums = mat.sum(axis=0)
+   per_class_accuracy = mat.diagonal() / class_sums
+
+   return per_class_accuracy.mean()
 
 
 logging.basicConfig(

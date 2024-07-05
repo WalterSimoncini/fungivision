@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 
-from src.gradients.simclr import SimCLRGradientsExtractor
+from src.fungivision.gradients.simclr import SimCLRGradientsExtractor
 
 
 @dataclass
