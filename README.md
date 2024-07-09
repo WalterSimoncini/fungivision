@@ -1,6 +1,8 @@
-# FUNGI Features
+# **FUNGI**: **F**eatures from **UN**supervised **G**rad**I**ents
+TODO Authornames
 
 This library allows you to extract **FUNGI**: **F**eatures from **UN**supervised **G**rad**I**ents from vision transformer backbones.
+The FUNGI leverage the power of self-supervised losses to provide features that improve upon kNN-classification for images, text, audio and even semantic segmentation on images.
 
 ## Getting Started
 
@@ -22,3 +24,9 @@ The goal of this repository is providing an easy to use library for extracting F
 - [Text](https://github.com/WalterSimoncini/fungi-text): k-nearest neighbor text classification using FUNGI obtained from text encoders.
 - [Audio](https://github.com/WalterSimoncini/fungi-ssast): k-nearest neighbor audio classification using FUNGI obtained from an SSAST backbone.
 - [ICL/HummingBird](https://github.com/WalterSimoncini/fungi-hummingbird): retrieval-based vision in-context learning evaluation on semantic segmentation tasks.
+
+## Reference
+TODO: add bibtex
+```
+simoncini2024fungi
+```
