@@ -206,7 +206,7 @@ fungi = FUNGIWrapper(
 
 The goal of this repository is providing an easy to use library for extracting FUNGI features from a vision transformer backbone. To reproduce the results shown in the paper please use the following repositories:
 
-- [Vision](): (TODO) k-nearest neighbor and linear classification of images and image retrieval experiments.
+- [Vision](https://github.com/WalterSimoncini/fungi-image): k-nearest neighbor and linear classification of images and image retrieval experiments.
 - [Text](https://github.com/WalterSimoncini/fungi-text): k-nearest neighbor text classification using FUNGI obtained from text encoders.
 - [Audio](https://github.com/WalterSimoncini/fungi-ssast): k-nearest neighbor audio classification using FUNGI obtained from an SSAST backbone.
 - [ICL/HummingBird](https://github.com/WalterSimoncini/fungi-hummingbird): retrieval-based vision in-context learning evaluation on semantic segmentation tasks.
