@@ -163,3 +163,4 @@ cython_debug/
 slurm-*
 *.job
 todo.txt
+cache
