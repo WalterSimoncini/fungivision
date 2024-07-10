@@ -1,6 +1,6 @@
 # **FUNGI**: **F**eatures from **UN**supervised **G**rad**I**ents
 
-Walter Simoncini<sup>1</sup>, Andrei Bursuc<sup>2</sup>, Spyros Gidaris<sup>2</sup>, Yuki M. Asano<sup>1</sup>.
+[Walter Simoncini](https://walter.ashita.nl/)<sup>1</sup>, [Andrei Bursuc](https://abursuc.github.io/)<sup>2</sup>, [Spyros Gidaris](https://scholar.google.fr/citations?user=7atfg7EAAAAJ&hl=en)<sup>2</sup>, [Yuki M. Asano](https://yukimasano.github.io/)<sup>1</sup>.
 
 1. [QUVA Lab](https://ivi.fnwi.uva.nl/quva/), University of Amsterdam.
 2. [valeo.ai](https://www.valeo.com/en/valeo-ai/), Paris, France.
