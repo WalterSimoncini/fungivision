@@ -5,7 +5,7 @@
 1. [QUVA Lab](https://ivi.fnwi.uva.nl/quva/), University of Amsterdam.
 2. [valeo.ai](https://www.valeo.com/en/valeo-ai/), Paris, France.
 
-This is the code for our [paper name]() paper.
+This is the code for our [No Train, all Gain: Self-Supervised Gradients Improve Deep Frozen Representations](http://example.com/) paper.
 
 The library allows you to extract **FUNGI**: **F**eatures from **UN**supervised **G**rad**I**ents from vision transformer backbones.
 The FUNGI leverage the power of self-supervised losses to provide features that improve upon kNN-classification for images, text, audio and even semantic segmentation on images.
