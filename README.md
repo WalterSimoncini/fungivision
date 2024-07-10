@@ -1,7 +1,12 @@
 # **FUNGI**: **F**eatures from **UN**supervised **G**rad**I**ents
-TODO Authornames
 
-This is the code for our [paper name]() paper. 
+Walter Simoncini<sup>1</sup>, Andrei Bursuc<sup>2</sup>, Spyros Gidaris<sup>2</sup>, Yuki M. Asano<sup>1</sup>.
+
+1. [QUVA Lab](https://ivi.fnwi.uva.nl/quva/), University of Amsterdam.
+2. [valeo.ai](https://www.valeo.com/en/valeo-ai/), Paris, France.
+
+This is the code for our [paper name]() paper.
+
 The library allows you to extract **FUNGI**: **F**eatures from **UN**supervised **G**rad**I**ents from vision transformer backbones.
 The FUNGI leverage the power of self-supervised losses to provide features that improve upon kNN-classification for images, text, audio and even semantic segmentation on images.
 
