@@ -111,7 +111,96 @@ features = torch.cat([
 
 ### Creating your own SSL objective
 
-Something something...
+You can create your own gradient-feature extractor, and to do so you just need to write two classes: a subclass of `BaseGradientExtractor` and its configuration dataclasss. Assuming your loss works with a single view, such as our KL objective, you just need to implement two methods:
+
+```python
+import torch
+import torchvision.transforms.v2 as tf
+
+from torch.nn.functional import log_softmax, softmax, kl_div
+from fungivision.gradients.base_extractor import BaseGradientExtractor
+
+
+class CustomGradientsExtractor(BaseGradientExtractor):
+    def input_transform(self, input_dim: int) -> nn.Module:
+        # Implement the data augmentation to be applied to each input image.
+        # input_dim indicates the input dimensionality of the backbone.
+        return tf.Compose([...])
+
+    def compute_loss(self, latents: torch.Tensor, views_per_sample: int, **kwargs) -> torch.Tensor:
+        # Given a batch of latent representations, compute the per-sample loss. It's
+        # extremely important that the computational graph for each individual input
+        # image is independent from the others, except for a final average of the
+        # individual losses. If this constraint is not respected the per-sample gradients
+        # will be contaminated by other batch items, and you will experience significant
+        # performance fluctuations as you change the batch size (up to 10-20-30%!).
+        #
+        # You can also test for this mistake by comparing the gradients of the same
+        # input sample when you forward it by itself and in a batch of 2 inputs. If
+        # the gradients are significantly different when you're testing on a CPU then
+        # the two batch items are probably interacting.
+        # 
+        # NOTE: on a GPU device the gradients may be slighty different as you change
+        # the batch size even if you've done everything correctly, as modern GPUs pick
+        # the most appropriate algorithm automatically, even if you force their behavior
+        # to be deterministic.
+        #
+        # latents is a [B * V, E] tensor, where B is the batch size and V the number
+        # of views (i.e. views_per_sample). If your data augmentation generates multiple
+        # views per image you can reshape them in [B, V, E] using the following code:
+        #
+        # batch_size = latents.shape[0] // views_per_sample
+        # latents = latents.reshape(batch_size, views_per_sample, -1)
+
+        # In this function we implement our KL loss. Notice that the computational
+        # graph of batch items is only fused at the end via reduction = "mean"
+        latent_dim = latents.shape[1]
+
+        uniform = (torch.ones(latent_dim) / latent_dim).to(self.device)
+
+        softmax_uniform = softmax(uniform / self.temperature, dim=0)
+        softmax_uniform = softmax_uniform.unsqueeze(dim=0).repeat(latents.shape[0], 1)
+
+        softmax_latents = log_softmax(latents / self.temperature, dim=1)
+
+        # NOTE: Always use a mean reduction!
+        return kl_div(softmax_latents, softmax_uniform, reduction="mean")
+```
+
+If you accept custom configuration parameters, e.g. `self.temperature` in this case, you should also override the `__init__` method and add your parameters before the `**kwargs`. For more complex examples (that use multiple views per input image) see the DINO and SimCLR gradient extractors in `src/fungivision/gradients`. Once you've created your gradients extractor create a configuration dataclass as follows, which defines every user-customizable parameter for your extractor.
+
+```python
+from dataclasses import dataclass, asdict
+
+from .extractor import CustomGradientsExtractor
+
+
+@dataclass
+class CustomConfig:
+    temperature: float = 1
+
+    def get_extractor(self, base_params: dict) -> CustomGradientsExtractor:
+        # Create an instance of your feature extractor by merging the given
+        # base parameters (which are common to all extractors) and your custom
+        # parameters defined in this dataclass.
+        params = base_params | asdict(self)
+
+        return CustomGradientsExtractor(**params)
+```
+
+You can then use your gradients extractor with `FUNGIWrapper`!
+
+```python
+fungi = FUNGIWrapper(
+    model=model,
+    target_layer="blocks.11.attn.proj",
+    device=device,
+    use_fp16=True,
+    extractor_configs=[
+        CustomConfig(temperature=0.07)
+    ]
+)
+```
 
 ## Related Repositories
 
