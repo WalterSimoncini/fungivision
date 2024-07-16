@@ -213,7 +213,16 @@ The goal of this repository is providing an easy to use library for extracting F
 
 ## Reference
 
-TODO: add bibtex
+If you found our work useful please cite us as follows:
+
 ```
-simoncini2024fungi
+@misc{simoncini2024fungi,
+      title={No Train, all Gain: Self-Supervised Gradients Improve Deep Frozen Representations}, 
+      author={Walter Simoncini and Spyros Gidaris and Andrei Bursuc and Yuki M. Asano},
+      year={2024},
+      eprint={2407.10964},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2407.10964}, 
+}
 ```
