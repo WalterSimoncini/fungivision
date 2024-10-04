@@ -22,3 +22,6 @@ dependencies = [
   "torchvision>=0.18.1",
   "tqdm>=4.66.4"
 ]
+
+[tool.flit.module]
+name = "fungivision"

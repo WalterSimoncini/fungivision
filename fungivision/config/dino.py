@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 
-from src.fungivision.gradients.dino import DINOGradientsExtractor
+from fungivision.gradients.dino import DINOGradientsExtractor
 
 
 @dataclass
