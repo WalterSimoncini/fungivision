@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "fungivision"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   {name="Walter Simoncini", email="walter@ashita.nl"},
 ]
