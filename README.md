@@ -12,13 +12,11 @@ The FUNGI leverage the power of self-supervised losses to provide features that 
 
 ## Getting Started
 
-You can build and install the `fungivision` package using the following command
+You can install the `fungivision` package using the following command. The package requires `Python 3.10`.
 
 ```sh
-pip install -e .
+pip install fungivision
 ```
-
-The package requires `Python 3.10`, but in principle you should be able to run `fungivision` on `Python 3.9` and greater. Modify the version as needed in `pyproject.toml`.
 
 We provide a quick demo of the library in `demo.ipynb`, where we extract FUNGI features for the [Flowers102](https://www.robots.ox.ac.uk/~vgg/data/flowers/102/) dataset and a DINOv1 backbone. If you want to run the k-nearest neighbor classification evaluation make sure to also install `scikit-learn`!
 
