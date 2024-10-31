@@ -209,13 +209,11 @@ The goal of this repository is providing an easy to use library for extracting F
 If you found our work useful please cite us as follows:
 
 ```
-@misc{simoncini2024fungi,
-      title={No Train, all Gain: Self-Supervised Gradients Improve Deep Frozen Representations}, 
-      author={Walter Simoncini and Spyros Gidaris and Andrei Bursuc and Yuki M. Asano},
-      year={2024},
-      eprint={2407.10964},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2407.10964}, 
+@inproceedings{simoncini2024fungi,
+    title={No Train, all Gain: Self-Supervised Gradients Improve Deep Frozen Representations},
+    author={Walter Simoncini and Spyros Gidaris and Andrei Bursuc and Yuki M. Asano},
+    booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
+    year={2024},
+    url={https://openreview.net/forum?id=PRBsEz8rnV}
 }
 ```
